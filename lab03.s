@@ -39,19 +39,6 @@ image565:
     .zero 512  # leave a 0.5Kibyte free space
 
 .text
-# -------- This is just for fun.
-# Ripes has a LED matrix in the I/O tab. To enable it:
-# - Go to the I/O tab and double click on LED Matrix.
-# - Change the Height and Width (at top-right part of I/O window),
-#     to the size of the image888 (6, 19 in this example)
-# - This will enable the LED matrix
-# - Uncomment the following and you should see the image on the LED matrix!
-#    la   a0, image888
-#    li   a1, LED_MATRIX_0_BASE
-#    li   a2, LED_MATRIX_0_WIDTH
-#    li   a3, LED_MATRIX_0_HEIGHT
-#    jal  ra, showImage
-# ----- This is where the fun part ends!
 
     la   a0, image888
     la   a3, image565
@@ -100,7 +87,32 @@ outShowRowLoop:
 rgb888_to_rgb565:
 # ----------------------------------------
 # Write your code here.
-# You may move the "return" instruction (jalr zero, ra, 0).
+
+    add  t0, zero, zero
+row:
+    bge  t0, a2, loop2
+    add  t1, zero, zero
+column:
+    bge  t1, a1, loop1
+    lbu  t2, 0(a0) 
+    lbu  t3, 1(a0)  
+    lbu  t4, 2(a0)  
+    andi t2, t2, 0xf8   
+    slli t2, t2, 8      
+    andi t3, t3, 0xfc   
+    slli t3, t3, 3      
+    srli t4, t4, 3      
+    or   t2, t2, t3
+    or   t2, t2, t4
+    sh   t2, 0(a3)   
+    addi a0, a0, 3   
+    addi a3, a3, 2   
+    addi t1, t1, 1
+    j    column
+loop1:
+    addi t0, t0, 1
+    j    row
+loop2:
     jalr zero, ra, 0
 
 
